@@ -4,6 +4,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.UUID;
 
+import javax.validation.constraints.Null;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,7 +22,8 @@ public class TestRestController {
   PrintWriter pw = new PrintWriter(sw);
 
   // create test object with random id and fixed message
-  String id = UUID.randomUUID().toString();
+  // String id = UUID.randomUUID().toString();
+  String id = "";
   Status test = new Status();
   String message = String.format("Message for the object: %s", id);
 
@@ -37,7 +40,7 @@ public class TestRestController {
   // test methods
 
   // create test object with random id and fixed message
-  private void createTestObject() {
+  private void createTestObject() throws Exception {
     try {
       pw.println("Setting id for test object: '" + id + "'");
       test.setId(id);
@@ -51,7 +54,7 @@ public class TestRestController {
 
   // verify there is nothing in the repo with the id and then create the test
   // object
-  private void addTestObject() {
+  private void addTestObject() throws Exception {
     try {
       pw.println("Testing for existing id in the repo '" + id + "' and  deleting as required.");
       Status exist = repo.get(id); // this should throw org.ektorp.DocumentNotFoundException if nothing exists
@@ -70,7 +73,7 @@ public class TestRestController {
 
   // validate the the test object is in the database with the correct id and
   // message
-  private void validateTestObject() {
+  private void validateTestObject() throws Exception {
     try {
       // retrieve check object from the repo with the same id as the test object
       Status check = repo.get(id);
@@ -98,7 +101,7 @@ public class TestRestController {
 
   // run the test
   @RequestMapping(value = "/test", produces = "text/plain")
-  public String runTest() {
+  public String runTest() throws Exception {
     try {
       pw.println("Beginning test...");
       createTestObject();
@@ -106,8 +109,9 @@ public class TestRestController {
       validateTestObject();
 
     } catch (Exception e) {
-      pw.println("FAIL: Unexpected error during test.");
-      e.printStackTrace();
+      pw.println("Failure handled in previous method.");
+      e.printStackTrace(pw);
+      throw e;
     }
     pw.flush();
     return sw.toString();
