@@ -22,8 +22,7 @@ public class TestRestController {
   PrintWriter pw = new PrintWriter(sw);
 
   // create test object with random id and fixed message
-  // String id = UUID.randomUUID().toString();
-  String id = "";
+  String id = UUID.randomUUID().toString();
   Status test = new Status();
   String message = String.format("Message for the object: %s", id);
 
@@ -49,6 +48,7 @@ public class TestRestController {
     } catch (Exception e) {
       pw.println("FAIL: Unexpected error during create test object.");
       e.printStackTrace(pw);
+      throw e;
     }
   }
 
@@ -65,9 +65,13 @@ public class TestRestController {
       delete(id);
       pw.println("Adding test object to the repo.");
       create(test);
-    } catch (org.ektorp.DocumentNotFoundException d) {
+    } catch (org.ektorp.DocumentNotFoundException e) {
       pw.println("Object with id '" + id + "' does not exist in the repo, adding test object to the repo.");
       create(test);
+    } catch (Exception e) {
+      pw.println("FAIL: Problem during add of object...");
+      e.printStackTrace(pw);
+      throw e;
     }
   }
 
@@ -96,12 +100,13 @@ public class TestRestController {
     } catch (Exception e) {
       pw.println("FAIL: Problem during retrieve of object...");
       e.printStackTrace(pw);
+      throw e;
     }
   }
 
   // run the test
   @RequestMapping(value = "/test", produces = "text/plain")
-  public String runTest() throws Exception {
+  public String runTest() {
     try {
       pw.println("Beginning test...");
       createTestObject();
@@ -109,9 +114,7 @@ public class TestRestController {
       validateTestObject();
 
     } catch (Exception e) {
-      pw.println("Failure handled in previous method.");
-      e.printStackTrace(pw);
-      throw e;
+      pw.println("Failure reported by previous method.");
     }
     pw.flush();
     return sw.toString();
